@@ -1,5 +1,5 @@
 connection: "snowlooker"
-
+#здесь был Ринат
 # include all the views
 include: "/views/**/*.view"
 
