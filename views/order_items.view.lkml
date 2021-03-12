@@ -1,7 +1,9 @@
 view: order_items {
   sql_table_name: "PUBLIC"."ORDER_ITEMS"
     ;;
-  drill_fields: [id]
+  drill_fields: [user_id, id]
+
+  label: "AAAA"
 
   dimension: id {
     primary_key: yes
@@ -97,6 +99,52 @@ view: order_items {
     drill_fields: [detail*]
   }
 
+  measure: count_orders {
+    label: "A count of unique orders"
+    type: count_distinct
+    drill_fields: [detail*]
+    sql: ${order_id}  ;;
+  }
+
+  measure: count_users {
+    label: "A count of users"
+    type: count_distinct
+    drill_fields: [detail*]
+    sql: ${user_id}  ;;
+  }
+  measure: total_sales {
+    label: "A sum of sale price"
+    type: sum
+    drill_fields: [detail*]
+    sql: ${sale_price}  ;;
+  }
+
+  measure: avg_sales {
+    type: average
+    drill_fields: [detail*]
+    sql: ${sale_price}  ;;
+  }
+
+  measure: total_sales_email_users {
+    type: sum
+    sql: ${sale_price} ;;
+    filters: [
+      users.traffic_source: "Email"
+    ]
+  }
+
+  measure: percentage_sales_email_source {
+    type: number
+    value_format_name: percent_1
+    sql: 1.0*${total_sales_email_users}
+      /NULLIF(${total_sales}, 0) ;;
+  }
+
+  measure: average_spend_per_user {
+    type:  number
+    value_format_name: usd
+    sql:  1.0 * ${total_sales}/NULLIF(${count_users}, 0) ;;
+  }
   # ----- Sets of fields for drilling ------
   set: detail {
     fields: [
